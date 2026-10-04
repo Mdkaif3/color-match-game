@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Color Match Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);}
+  *{box-sizing:border-box;}
+  html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%;}
+  body{height:100%;margin:0;background:#0b0c14;display:flex;align-items:center;justify-content:center;overflow-x:hidden;}
+</style>
+</head>
+<body>
+<div id="cm-widget">
+
+  <div class="cm-header">
+    <div class="cm-coins">🪙 <span id="cm-coins">0</span></div>
+    <div class="cm-daystreak" id="cm-daystreak">🔥 0 day streak</div>
+  </div>
+
+  <div class="cm-tabnav">
+    <button class="cm-tabbtn cm-active" data-tab="play">🎮 Play</button>
+    <button class="cm-tabbtn" data-tab="missions">🎯 Missions</button>
+    <button class="cm-tabbtn" data-tab="shop">🎨 Shop</button>
+    <button class="cm-tabbtn" data-tab="trophies">🏆 Trophies</button>
+  </div>
+
+  <!-- ===== PLAY ===== -->
+  <div class="cm-panel cm-active" data-panel="play">
+    <div class="cm-stage">
+      <div class="cm-topline">
+        <h1 class="cm-title">Color Match</h1>
+        <div class="cm-streak" id="cm-streak"></div>
+      </div>
+      <div class="cm-tag">Match 3 same-colored tiles within 5 seconds — miss the time or the match, lose a heart.</div>
+      <div class="cm-lives" id="cm-lives">
+        <span class="cm-heart" data-i="0">❤️</span><span class="cm-heart" data-i="1">❤️</span><span class="cm-heart" data-i="2">❤️</span>
+      </div>
+
+      <div class="cm-stats">
+        <div class="cm-stat"><div class="cm-v" id="cm-score">0</div><div class="cm-l">SCORE</div></div>
+        <div class="cm-stat"><div class="cm-v" id="cm-best">0</div><div class="cm-l">BEST</div></div>
+        <div class="cm-stat cm-time"><div class="cm-v" id="cm-time">5</div><div class="cm-l">TIME</div></div>
+      </div>
+      <div class="cm-nextgoal" id="cm-nextgoal">Play to set your first Best score!</div>
+      <div class="cm-timebar"><i id="cm-timebar"></i></div>
+
+      <div class="cm-board" id="cm-board">
+        <div class="cm-idlewarn" id="cm-idlewarn">Hurry! ⏱️</div>
+      </div>
+
+      <div class="cm-foot">
+        <div class="cm-pill" id="cm-levelPill">Level 1</div>
+        <div class="cm-xpwrap"><div class="cm-xpbar"><i id="cm-xpbar"></i></div></div>
+        <button class="cm-iconbtn" id="cm-muteBtn" aria-label="Toggle sound">🔊</button>
+      </div>
+
+      <button class="cm-btn cm-dailybtn" id="cm-dailyBtn">🗓️ Daily Challenge · Best: <span id="cm-dailyBestLabel">0</span></button>
+
+      <div class="cm-adslot" id="cm-adslot-banner">Ad</div>
+    </div>
+  </div>
+
+  <!-- ===== MISSIONS ===== -->
+  <div class="cm-panel" data-panel="missions">
+    <h3 class="cm-panelTitle">Today's Missions</h3>
+    <div id="cm-missionsList"></div>
+  </div>
+
+  <!-- ===== SHOP ===== -->
+  <div class="cm-panel" data-panel="shop">
+    <h3 class="cm-panelTitle">Themes</h3>
+    <div class="cm-themegrid" id="cm-themeGrid"></div>
+  </div>
+
+  <!-- ===== TROPHIES ===== -->
+  <div class="cm-panel" data-panel="trophies">
+    <h3 class="cm-panelTitle">Achievements</h3>
+    <div id="cm-achList"></div>
+  </div>
+
+  <!-- ===== overlays (always on top, any tab) ===== -->
+  <div class="cm-overlay" id="cm-startOverlay">
+    <div class="cm-card">
+      <h2>Color Match</h2>
+      <div class="cm-sub">Match 3 same-colored tiles before time runs out. Chain matches for combo bonus, grab gold tiles, and level up for extra time.</div>
+      <button class="cm-btn" id="cm-startBtn">Play</button>
+    </div>
+  </div>
+
+  <div class="cm-overlay" id="cm-overOverlay">
+    <div class="cm-card">
+      <h2 id="cm-overTitle">Time's up!</h2>
+      <div class="cm-big" id="cm-finalScore">0</div>
+      <div class="cm-sub">points · reached Level <span id="cm-finalLevel">1</span></div>
+      <div class="cm-newbest" id="cm-newBestMsg" style="display:none;">★ New best score!</div>
+      <div class="cm-newbest" id="cm-newDailyMsg" style="display:none;">🗓️ New Daily Challenge best!</div>
+      <div class="cm-coinsEarned" id="cm-coinsEarned">+0 🪙</div>
+      <div class="cm-adslot" id="cm-adslot-gameover">Ad</div>
+      <button class="cm-btn" id="cm-againBtn">Play Again</button>
+    </div>
+  </div>
+
+  <div class="cm-levelToast" id="cm-levelToast">
+    <div class="cm-lt-big" id="cm-lt-num">Level 2</div>
+    <div class="cm-lt-sub" id="cm-lt-sub">+5 seconds</div>
+  </div>
+
+  <div class="cm-achToast" id="cm-achToast">
+    <div class="cm-at-icon" id="cm-at-icon">🏆</div>
+    <div>
+      <div class="cm-at-name" id="cm-at-name">Achievement</div>
+      <div class="cm-at-sub" id="cm-at-sub">+10 coins</div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+  #cm-widget{
+    --cm-bg:#11121c; --cm-panel:#1d2032; --cm-line:#2b2e44;
+    --cm-ink:#f1f2f8; --cm-ink-dim:#9497b3; --cm-accent:#8b6bff; --cm-accent2:#5ad6c4;
+    --cm-gold:#ffd166;
+    max-width:440px; margin:20px auto; padding:18px 16px 24px;
+    background:
+      radial-gradient(900px 500px at 20% -10%, #241f44 0%, transparent 60%),
+      radial-gradient(700px 500px at 110% 10%, #1a3a3a 0%, transparent 55%),
+      var(--cm-bg);
+    border-radius:24px; color:var(--cm-ink);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    position:relative; overflow:hidden; transition:background .4s ease;
+  }
+  #cm-widget *{box-sizing:border-box;}
+  #cm-widget.cm-shaking{animation:cm-screenshake .32s ease;}
+  @keyframes cm-screenshake{
+    10%{transform:translate(-3px,1px);} 30%{transform:translate(3px,-2px);}
+    50%{transform:translate(-2px,2px);} 70%{transform:translate(2px,-1px);} 100%{transform:translate(0,0);}
+  }
+  #cm-widget .cm-header{display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px;}
+  #cm-widget .cm-coins, #cm-widget .cm-daystreak{background:var(--cm-panel); border:1px solid var(--cm-line); padding:6px 11px; border-radius:999px;}
+  #cm-widget .cm-tabnav{display:flex; gap:6px; margin-bottom:16px;}
+  #cm-widget .cm-tabbtn{flex:1; background:var(--cm-panel); border:1px solid var(--cm-line); color:var(--cm-ink-dim); padding:8px 2px; border-radius:12px; font-size:11px; cursor:pointer; font-weight:600;}
+  #cm-widget .cm-tabbtn.cm-active{color:#fff; border-color:var(--cm-accent); box-shadow:0 0 0 1px var(--cm-accent) inset;}
+  #cm-widget .cm-panel{display:none;}
+  #cm-widget .cm-panel.cm-active{display:block;}
+  #cm-widget .cm-panelTitle{font-family:'Space Grotesk',sans-serif; font-size:16px; margin:2px 0 12px;}
+  #cm-widget .cm-topline{display:flex; align-items:baseline; justify-content:space-between;}
+  #cm-widget .cm-title{
+    font-family:'Space Grotesk',system-ui,sans-serif; font-weight:700;
+    font-size:clamp(26px,7vw,34px); letter-spacing:-0.02em; margin:4px 0 2px;
+    background:linear-gradient(90deg,var(--cm-accent),var(--cm-accent2));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  #cm-widget .cm-streak{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15px; color:var(--cm-gold); opacity:0; transition:opacity .2s ease;}
+  #cm-widget .cm-streak.cm-on{opacity:1;}
+  #cm-widget .cm-tag{color:var(--cm-ink-dim); font-size:14px; margin-bottom:10px;}
+  #cm-widget .cm-lives{display:flex; gap:6px; margin-bottom:16px; font-size:19px; line-height:1;}
+  #cm-widget .cm-heart{transition:transform .25s ease, filter .25s ease, opacity .25s ease;}
+  #cm-widget .cm-heart.cm-lost{filter:grayscale(1); opacity:.35; transform:scale(.85);}
+  #cm-widget .cm-heart.cm-losing{animation:cm-heartlose .4s ease;}
+  @keyframes cm-heartlose{
+    0%{transform:scale(1);} 30%{transform:scale(1.3) rotate(-8deg);}
+    60%{transform:scale(.7) rotate(6deg);} 100%{transform:scale(.85);}
+  }
+  #cm-widget .cm-stats{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:10px;}
+  #cm-widget .cm-stat{background:var(--cm-panel); border:1px solid var(--cm-line); border-radius:14px; padding:10px 8px; text-align:center; transition:transform .15s ease, box-shadow .15s ease;}
+  #cm-widget .cm-stat.cm-pulse{transform:scale(1.08); box-shadow:0 0 0 2px var(--cm-gold);}
+  #cm-widget .cm-v{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:22px;}
+  #cm-widget .cm-l{color:var(--cm-ink-dim); font-size:11px; margin-top:2px;}
+  #cm-widget .cm-time .cm-v{color:var(--cm-accent2);}
+  #cm-widget .cm-nextgoal{font-size:12px; color:var(--cm-accent2); margin:0 0 12px; font-weight:600;}
+  #cm-widget .cm-timebar{height:4px; border-radius:2px; background:var(--cm-line); overflow:hidden;}
+  #cm-widget .cm-timebar i{display:block; height:100%; width:100%; background:linear-gradient(90deg,var(--cm-accent2),var(--cm-accent)); transform-origin:left; transition:transform 1s linear, background .3s;}
+  #cm-widget .cm-board{position:relative; display:grid; grid-template-columns:repeat(4,1fr); gap:9px; margin-top:16px; aspect-ratio:1/1;}
+  #cm-widget .cm-tile{
+    position:relative; border-radius:16px; border:none; cursor:pointer; appearance:none; padding:0;
+    box-shadow:inset 0 -4px 0 rgba(0,0,0,.22), 0 6px 14px rgba(0,0,0,.25);
+    transform:scale(1); transition:transform .12s ease, box-shadow .12s ease, opacity .25s ease;
+    overflow:visible;
+  }
+  #cm-widget .cm-tile:active{transform:scale(.93);}
+  #cm-widget .cm-tile.cm-selected{transform:scale(.9); box-shadow:inset 0 -4px 0 rgba(0,0,0,.22), 0 0 0 3px #fff, 0 6px 14px rgba(0,0,0,.3);}
+  #cm-widget .cm-tile.cm-pop{animation:cm-pop .32s ease forwards;}
+  #cm-widget .cm-tile.cm-shake{animation:cm-shake .34s ease;}
+  #cm-widget .cm-tile.cm-enter{animation:cm-drop .32s cubic-bezier(.2,.9,.3,1.2);}
+  #cm-widget .cm-tile.cm-bonus{box-shadow:inset 0 -4px 0 rgba(0,0,0,.22), 0 0 0 2px var(--cm-gold), 0 0 16px rgba(255,209,102,.7);}
+  #cm-widget .cm-tile.cm-bonus::after{
+    content:"★"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:18px; text-shadow:0 1px 3px rgba(0,0,0,.4); animation:cm-sparkle 1.1s ease-in-out infinite;
+  }
+  @keyframes cm-sparkle{0%,100%{opacity:.75; transform:scale(1);} 50%{opacity:1; transform:scale(1.18);}}
+  @keyframes cm-pop{ to{ transform:scale(0); opacity:0; } }
+  @keyframes cm-shake{ 20%{transform:translateX(-5px);} 40%{transform:translateX(5px);} 60%{transform:translateX(-4px);} 80%{transform:translateX(4px);} 100%{transform:translateX(0);} }
+  @keyframes cm-drop{ from{ transform:translateY(-14px) scale(.6); opacity:0;} to{ transform:translateY(0) scale(1); opacity:1;} }
+  #cm-widget .cm-float{
+    position:absolute; pointer-events:none; font-family:'Space Grotesk',sans-serif; font-weight:700;
+    font-size:16px; color:var(--cm-gold); z-index:5; animation:cm-floatup .7s ease forwards;
+  }
+  @keyframes cm-floatup{ 0%{transform:translateY(0); opacity:1;} 100%{transform:translateY(-38px); opacity:0;} }
+  #cm-widget .cm-particle{position:absolute; width:6px; height:6px; border-radius:50%; pointer-events:none; z-index:4; animation:cm-burst .55s ease-out forwards;}
+  @keyframes cm-burst{ to{ transform:translate(var(--dx),var(--dy)) scale(0); opacity:0; } }
+  #cm-widget .cm-board.cm-reshuffling .cm-tile{ animation:cm-reshuffleflash .45s ease; }
+  @keyframes cm-reshuffleflash{ 0%{opacity:1; filter:brightness(1);} 40%{opacity:.25; filter:brightness(2.2);} 100%{opacity:1; filter:brightness(1);} }
+  #cm-widget .cm-idlewarn{
+    position:absolute; left:50%; bottom:6px; transform:translateX(-50%) translateY(6px); opacity:0;
+    font-size:11px; color:var(--cm-gold); font-weight:600; letter-spacing:.02em;
+    transition:opacity .2s ease, transform .2s ease; pointer-events:none; z-index:6;
+  }
+  #cm-widget .cm-idlewarn.cm-show{opacity:1; transform:translateX(-50%) translateY(0);}
+  #cm-widget .cm-foot{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:16px; color:var(--cm-ink-dim); font-size:13px;}
+  #cm-widget .cm-pill{background:var(--cm-panel); border:1px solid var(--cm-line); border-radius:999px; padding:6px 12px; font-size:12px; white-space:nowrap;}
+  #cm-widget .cm-xpwrap{flex:1; height:6px; background:var(--cm-line); border-radius:4px; overflow:hidden;}
+  #cm-widget .cm-xpbar{display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--cm-accent2),var(--cm-gold)); transition:width .4s ease;}
+  #cm-widget .cm-iconbtn{background:none;border:none;color:var(--cm-ink-dim);cursor:pointer;font-size:16px;padding:4px;}
+  #cm-widget .cm-dailybtn{margin-top:16px; background:linear-gradient(90deg,#2a2d44,#20243a); box-shadow:none; border:1px solid var(--cm-line); font-size:13px;}
+  #cm-widget .cm-overlay{
+    position:absolute; inset:0; background:rgba(10,10,16,.78); backdrop-filter:blur(6px);
+    display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none;
+    transition:opacity .25s ease; z-index:30; padding:20px; border-radius:24px;
+  }
+  #cm-widget .cm-overlay.cm-show{opacity:1; pointer-events:auto;}
+  #cm-widget .cm-card{
+    background:var(--cm-panel); border:1px solid var(--cm-line); border-radius:22px;
+    padding:28px 26px; width:100%; max-width:320px; text-align:center;
+    transform:translateY(10px); transition:transform .25s ease; max-height:88vh; overflow-y:auto;
+  }
+  #cm-widget .cm-overlay.cm-show .cm-card{transform:translateY(0);}
+  #cm-widget .cm-card h2{font-family:'Space Grotesk',sans-serif; font-size:24px; margin:0 0 6px;}
+  #cm-widget .cm-big{font-family:'Space Grotesk',sans-serif; font-size:44px; font-weight:700; color:var(--cm-accent2); margin:10px 0 2px;}
+  #cm-widget .cm-sub{color:var(--cm-ink-dim); font-size:13px; margin-bottom:12px;}
+  #cm-widget .cm-newbest{color:var(--cm-gold); font-size:13px; font-weight:600; margin-bottom:6px;}
+  #cm-widget .cm-coinsEarned{font-family:'Space Grotesk',sans-serif; font-weight:700; color:var(--cm-gold); font-size:18px; margin:10px 0 16px;}
+  #cm-widget .cm-btn{
+    width:100%; padding:14px; border:none; border-radius:14px; cursor:pointer;
+    font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:16px;
+    background:linear-gradient(90deg,var(--cm-accent),#6f5cf0); color:#fff;
+    box-shadow:0 8px 20px -6px rgba(139,107,255,.6); transition:transform .12s ease;
+  }
+  #cm-widget .cm-btn:active{transform:scale(.97);}
+  #cm-widget .cm-adslot{
+    margin-top:16px; min-height:50px; border:1px dashed var(--cm-line); border-radius:12px;
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    color:var(--cm-ink-dim); font-size:11px; padding:6px; overflow:hidden;
+  }
+  #cm-widget .cm-card .cm-adslot{margin-top:4px; margin-bottom:18px;}
+  #cm-widget .cm-levelToast, #cm-widget .cm-achToast{
+    position:absolute; left:50%; transform:translate(-50%,-30px) scale(.8); opacity:0;
+    text-align:center; z-index:40; pointer-events:none; transition:opacity .25s ease, transform .25s ease;
+  }
+  #cm-widget .cm-levelToast{top:34%;}
+  #cm-widget .cm-levelToast.cm-show{opacity:1; transform:translate(-50%,0) scale(1);}
+  #cm-widget .cm-lt-big{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:34px; color:var(--cm-gold); text-shadow:0 2px 14px rgba(255,209,102,.6);}
+  #cm-widget .cm-lt-sub{font-size:13px; color:var(--cm-ink);}
+  #cm-widget .cm-achToast{
+    top:10px; display:flex; align-items:center; gap:10px; background:var(--cm-panel);
+    border:1px solid var(--cm-gold); border-radius:14px; padding:10px 14px; text-align:left;
+    transform:translate(-50%,-16px); max-width:90%;
+  }
+  #cm-widget .cm-achToast.cm-show{opacity:1; transform:translate(-50%,0);}
+  #cm-widget .cm-at-icon{font-size:22px;}
+  #cm-widget .cm-at-name{font-weight:700; font-size:13px;}
+  #cm-widget .cm-at-sub{font-size:11px; color:var(--cm-gold);}
+
+  #cm-widget .cm-missioncard{background:var(--cm-panel); border:1px solid var(--cm-line); border-radius:14px; padding:12px 14px; margin-bottom:10px;}
+  #cm-widget .cm-missiontitle{font-size:13px; font-weight:600; margin-bottom:8px;}
+  #cm-widget .cm-missionbar{height:6px; background:var(--cm-line); border-radius:4px; overflow:hidden; margin-bottom:8px;}
+  #cm-widget .cm-missionbar i{display:block; height:100%; background:linear-gradient(90deg,var(--cm-accent2),var(--cm-accent)); transition:width .3s ease;}
+  #cm-widget .cm-missionrow{display:flex; justify-content:space-between; align-items:center;}
+  #cm-widget .cm-missionprog{font-size:11px; color:var(--cm-ink-dim);}
+  #cm-widget .cm-claimbtn{background:var(--cm-gold); color:#2a2000; border:none; padding:6px 14px; border-radius:999px; font-size:11px; font-weight:700; cursor:pointer;}
+  #cm-widget .cm-claimbtn:disabled{opacity:.3; cursor:default; background:var(--cm-line); color:var(--cm-ink-dim);}
+
+  #cm-widget .cm-themegrid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  #cm-widget .cm-themecard{background:var(--cm-panel); border:1px solid var(--cm-line); border-radius:14px; padding:12px; text-align:center;}
+  #cm-widget .cm-themecard.cm-selected{border-color:var(--cm-accent2); box-shadow:0 0 0 1px var(--cm-accent2) inset;}
+  #cm-widget .cm-themeswatch{height:40px; border-radius:10px; margin-bottom:8px;}
+  #cm-widget .cm-themename{font-size:12px; font-weight:600; margin-bottom:2px;}
+  #cm-widget .cm-themecost{font-size:11px; color:var(--cm-ink-dim); margin-bottom:8px;}
+  #cm-widget .cm-themebtn{width:100%; padding:7px; border:none; border-radius:999px; font-size:11px; font-weight:700; cursor:pointer; background:var(--cm-accent); color:#fff;}
+  #cm-widget .cm-themebtn:disabled{opacity:.35; cursor:default;}
+
+  #cm-widget .cm-achcard{display:flex; gap:12px; align-items:center; background:var(--cm-panel); border:1px solid var(--cm-line); border-radius:14px; padding:10px 14px; margin-bottom:8px;}
+  #cm-widget .cm-achcard.cm-locked{opacity:.4;}
+  #cm-widget .cm-achicon{font-size:22px; width:28px; text-align:center;}
+  #cm-widget .cm-achname{font-weight:700; font-size:13px;}
+  #cm-widget .cm-achdesc{font-size:11px; color:var(--cm-ink-dim);}
+</style>
+
+<script>
+(function(){
+  "use strict";
+  var root = document.getElementById('cm-widget');
+  if(!root) return;
+
+  var COLORS = ["#ff5c7a","#ffb020","#2dd4a7","#3ea6ff","#a78bfa","#ff7edb","#ffe066"];
+  var GRID = 16, TURN_TIME = 5; // seconds allowed PER MATCH — resets after every match, runs out -> lose a heart
+  var SAVE_KEY = 'cmProgressV1';
+
+  // ---------- persistent progress ----------
+  var P = loadProgress();
+  function defaultProgress(){
+    return {
+      coins:0, bestScore:0, theme:'default', themesOwned:['default'],
+      achievements:{}, totalMatches:0, totalGames:0,
+      dayStreak:0, lastPlayDate:null, streakClaimed:[],
+      missionsDate:null, missions:[],
+      dailyDate:null, dailyBest:0
+    };
+  }
+  function loadProgress(){
+    try{
+      var raw = localStorage.getItem(SAVE_KEY);
+      if(raw) return Object.assign(defaultProgress(), JSON.parse(raw));
+    }catch(e){}
+    return defaultProgress();
+  }
+  function saveProgress(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(P)); }catch(e){} }
+
+  function todayStr(){ var d = new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+  function yesterdayStr(){ var d = new Date(); d.setDate(d.getDate()-1); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+  function hashStr(s){ var h=0; for(var i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))|0; } return Math.abs(h); }
+  function mulberry32(a){
+    return function(){
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a>>>15), 1 | a);
+      t = (t + Math.imul(t ^ (t>>>7), 61 | t)) ^ t;
+      return ((t ^ (t>>>14)) >>> 0) / 4294967296;
+    };
+  }
+
+  // ---------- DOM refs ----------
+  var boardEl   = root.querySelector('#cm-board');
+  var scoreEl   = root.querySelector('#cm-score');
+  var bestEl    = root.querySelector('#cm-best');
+  var timeEl    = root.querySelector('#cm-time');
+  var timebarEl = root.querySelector('#cm-timebar');
+  var levelPill = root.querySelector('#cm-levelPill');
+  var xpbar     = root.querySelector('#cm-xpbar');
+  var streakEl  = root.querySelector('#cm-streak');
+  var nextGoalEl= root.querySelector('#cm-nextgoal');
+  var startOverlay = root.querySelector('#cm-startOverlay');
+  var overOverlay  = root.querySelector('#cm-overOverlay');
+  var finalScoreEl = root.querySelector('#cm-finalScore');
+  var finalLevelEl = root.querySelector('#cm-finalLevel');
+  var newBestMsg   = root.querySelector('#cm-newBestMsg');
+  var newDailyMsg  = root.querySelector('#cm-newDailyMsg');
+  var coinsEarnedEl= root.querySelector('#cm-coinsEarned');
+  var muteBtn      = root.querySelector('#cm-muteBtn');
+  var levelToast   = root.querySelector('#cm-levelToast');
+  var ltNum = root.querySelector('#cm-lt-num');
+  var ltSub = root.querySelector('#cm-lt-sub');
+  var achToast = root.querySelector('#cm-achToast');
+  var atIcon = root.querySelector('#cm-at-icon');
+  var atName = root.querySelector('#cm-at-name');
+  var atSub  = root.querySelector('#cm-at-sub');
+  var scoreStat = scoreEl.closest('.cm-stat');
+  var bestStat  = bestEl.closest('.cm-stat');
+  var idleWarnEl = root.querySelector('#cm-idlewarn');
+  var heartEls = Array.prototype.slice.call(root.querySelectorAll('.cm-heart'));
+  var overTitleEl = root.querySelector('#cm-overTitle');
+  var coinsHeaderEl = root.querySelector('#cm-coins');
+  var dayStreakEl = root.querySelector('#cm-daystreak');
+  var adSlotGameover = root.querySelector('#cm-adslot-gameover');
+  var dailyBtn = root.querySelector('#cm-dailyBtn');
+  var dailyBestLabel = root.querySelector('#cm-dailyBestLabel');
+  var missionsListEl = root.querySelector('#cm-missionsList');
+  var themeGridEl = root.querySelector('#cm-themeGrid');
+  var achListEl = root.querySelector('#cm-achList');
+
+  var MAX_LIVES = 3;
+  var lives = MAX_LIVES;
+  var tiles = [], selected = [];
+  var score = 0, best = 0, timeLeft = TURN_TIME;
+  var activeColors = 4, level = 1, combo = 0;
+  var timerId = null, bonusTimerId = null, running = false, locked = false, muted = false;
+  var dailyMode = false, rng = Math.random;
+  var sessionOutcomes = [], adaptiveOffset = 0;
+  var sComboMax = 0, sBonusCount = 0, sScore100 = false;
+
+  best = P.bestScore; bestEl.textContent = best;
+
+  function vibrate(pattern){ try{ if(navigator.vibrate) navigator.vibrate(pattern); }catch(e){} }
+
+  // ---------- sound ----------
+  var actx = null;
+  function audioCtx(){ if(!actx){ try{ actx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ actx=null; } } return actx; }
+  function beep(freq, dur, type, vol){
+    if(muted) return;
+    var ctx = audioCtx(); if(!ctx) return;
+    try{
+      var o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = type || 'sine'; o.frequency.value = freq; g.gain.value = vol || 0.08;
+      o.connect(g); g.connect(ctx.destination);
+      var now = ctx.currentTime;
+      g.gain.setValueAtTime(g.gain.value, now);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+      o.start(now); o.stop(now + dur);
+    }catch(e){}
+  }
+  function sfxMatch(mult){ var base=440+Math.min(mult,6)*70; beep(base,.12,'triangle',.09); setTimeout(function(){beep(base*1.5,.14,'triangle',.07);},60); }
+  function sfxBonus(){ beep(660,.1,'square',.08); setTimeout(function(){beep(990,.16,'square',.08);},70); }
+  function sfxMiss(){ beep(160,.18,'sawtooth',.06); }
+  function sfxTick(){ beep(880,.04,'square',.025); }
+  function sfxOver(){ beep(220,.3,'sine',.08); setTimeout(function(){beep(160,.4,'sine',.08);},150); }
+  function sfxLevelUp(){ beep(520,.12,'triangle',.1); setTimeout(function(){beep(780,.12,'triangle',.1);},90); setTimeout(function(){beep(1040,.2,'triangle',.1);},180); }
+  function sfxAch(){ beep(700,.08,'square',.07); setTimeout(function(){beep(1050,.16,'square',.08);},80); }
+  function sfxCoin(){ beep(1100,.05,'square',.05); }
+
+  muteBtn.addEventListener('click', function(){ muted=!muted; muteBtn.textContent = muted?'🔇':'🔊'; });
+
+  // ---------- tabs ----------
+  var tabBtns = Array.prototype.slice.call(root.querySelectorAll('.cm-tabbtn'));
+  var panels = Array.prototype.slice.call(root.querySelectorAll('.cm-panel'));
+  function setTab(name){
+    tabBtns.forEach(function(b){ b.classList.toggle('cm-active', b.dataset.tab===name); });
+    panels.forEach(function(p){ p.classList.toggle('cm-active', p.dataset.panel===name); });
+  }
+  tabBtns.forEach(function(b){ b.addEventListener('click', function(){ setTab(b.dataset.tab); }); });
+
+  // ---------- THEMES ----------
+  var THEMES = [
+    {id:'default', name:'Midnight Violet', cost:0,   accent:'#8b6bff', accent2:'#5ad6c4', gold:'#ffd166'},
+    {id:'sunset',  name:'Sunset Pop',      cost:150, accent:'#ff7a59', accent2:'#ffd166', gold:'#ff5c7a'},
+    {id:'ocean',   name:'Ocean Deep',      cost:150, accent:'#3ea6ff', accent2:'#2dd4a7', gold:'#9fe8ff'},
+    {id:'royal',   name:'Royal Gold',      cost:300, accent:'#ffd166', accent2:'#8b6bff', gold:'#ffe066'}
+  ];
+  function applyTheme(id){
+    var t = THEMES.filter(function(x){ return x.id===id; })[0] || THEMES[0];
+    root.style.setProperty('--cm-accent', t.accent);
+    root.style.setProperty('--cm-accent2', t.accent2);
+    root.style.setProperty('--cm-gold', t.gold);
+    P.theme = t.id; saveProgress();
+  }
+  function renderShop(){
+    themeGridEl.innerHTML = '';
+    THEMES.forEach(function(t){
+      var owned = P.themesOwned.indexOf(t.id) !== -1;
+      var selected = P.theme === t.id;
+      var card = document.createElement('div');
+      card.className = 'cm-themecard' + (selected ? ' cm-selected' : '');
+      var btnLabel = selected ? 'Selected' : (owned ? 'Use' : ('Unlock · 🪙'+t.cost));
+      card.innerHTML =
+        '<div class="cm-themeswatch" style="background:linear-gradient(135deg,'+t.accent+','+t.accent2+')"></div>' +
+        '<div class="cm-themename">'+t.name+'</div>' +
+        '<div class="cm-themecost">'+(t.cost===0 ? 'Free' : 'Cosmetic only')+'</div>' +
+        '<button class="cm-themebtn" '+(selected?'disabled':'')+'>'+btnLabel+'</button>';
+      card.querySelector('button').addEventListener('click', function(){
+        if(owned){ applyTheme(t.id); renderShop(); }
+        else if(P.coins >= t.cost){
+          P.coins -= t.cost; P.themesOwned.push(t.id); applyTheme(t.id);
+          sfxCoin(); renderHeader(); renderShop();
+        }
+      });
+      themeGridEl.appendChild(card);
+    });
+  }
+
+  // ---------- ACHIEVEMENTS ----------
+  var ACHIEVEMENTS = [
+    {id:'first_match', icon:'🥇', name:'First Match', desc:'Make your first match', reward:10, check:function(c){ return P.totalMatches>=1; }},
+    {id:'combo5',       icon:'🔥', name:'Combo Master', desc:'Hit a x5 combo in a game', reward:30, check:function(c){ return c.comboMax>=5; }},
+    {id:'score100',     icon:'💯', name:'Century', desc:'Score 100+ in one game', reward:25, check:function(c){ return c.lastScore>=100; }},
+    {id:'level5',       icon:'🚀', name:'Level 5', desc:'Reach Level 5 in a game', reward:30, check:function(c){ return c.lastLevel>=5; }},
+    {id:'matches100',   icon:'🏅', name:'Centurion', desc:'100 lifetime matches', reward:50, check:function(c){ return P.totalMatches>=100; }},
+    {id:'streak7',      icon:'📅', name:'Week Streak', desc:'7-day play streak', reward:60, check:function(c){ return P.dayStreak>=7; }},
+    {id:'beatbest',     icon:'🏆', name:'Personal Best', desc:'Beat your own best score', reward:20, check:function(c){ return c.beatBest; }},
+    {id:'daily1',       icon:'🗓️', name:'Daily Challenger', desc:'Play the Daily Challenge', reward:15, check:function(c){ return c.playedDaily; }}
+  ];
+  function renderAchievements(){
+    achListEl.innerHTML = '';
+    ACHIEVEMENTS.forEach(function(a){
+      var unlocked = !!P.achievements[a.id];
+      var card = document.createElement('div');
+      card.className = 'cm-achcard' + (unlocked ? '' : ' cm-locked');
+      card.innerHTML =
+        '<div class="cm-achicon">'+(unlocked ? a.icon : '🔒')+'</div>' +
+        '<div><div class="cm-achname">'+a.name+'</div><div class="cm-achdesc">'+a.desc+' · 🪙'+a.reward+'</div></div>';
+      achListEl.appendChild(card);
+    });
+  }
+  function checkAchievements(ctx){
+    ACHIEVEMENTS.forEach(function(a){
+      if(!P.achievements[a.id] && a.check(ctx)){
+        P.achievements[a.id] = true;
+        P.coins += a.reward;
+        showAchToast(a);
+      }
+    });
+    saveProgress(); renderHeader(); renderAchievements();
+  }
+  function showAchToast(a){
+    sfxAch(); vibrate([0,20,30,20]);
+    atIcon.textContent = a.icon; atName.textContent = a.name; atSub.textContent = '+'+a.reward+' coins';
+    achToast.classList.add('cm-show');
+    setTimeout(function(){ achToast.classList.remove('cm-show'); }, 2200);
+  }
+
+  // ---------- MISSIONS ----------
+  var MISSION_POOL = [
+    {id:'matches10', desc:'Make 10 matches', type:'matches', target:10, reward:20},
+    {id:'matches20', desc:'Make 20 matches', type:'matches', target:20, reward:30},
+    {id:'combo5m',   desc:'Achieve a 5x combo', type:'combo5', target:1, reward:25},
+    {id:'score100m', desc:'Score 100 points in a game', type:'score100', target:1, reward:25},
+    {id:'bonus2',    desc:'Collect 2 gold bonus tiles', type:'bonus', target:2, reward:20},
+    {id:'games2',    desc:'Play 2 games today', type:'games', target:2, reward:15}
+  ];
+  function ensureMissionsForToday(){
+    var today = todayStr();
+    if(P.missionsDate !== today){
+      var seed = hashStr(today), pool = MISSION_POOL.slice(), picks = [];
+      for(var i=0;i<3;i++){ var idx=(seed+i*7)%pool.length; picks.push(pool.splice(idx,1)[0]); }
+      P.missions = picks.map(function(m){ return {id:m.id, desc:m.desc, type:m.type, target:m.target, reward:m.reward, progress:0, claimed:false}; });
+      P.missionsDate = today; saveProgress();
+    }
+  }
+  function updateMissionProgress(type, amount){
+    var changed = false;
+    P.missions.forEach(function(m){
+      if(m.type===type && !m.claimed && m.progress<m.target){
+        m.progress = Math.min(m.target, m.progress+amount); changed = true;
+      }
+    });
+    if(changed){ saveProgress(); renderMissions(); updateNextGoal(); }
+  }
+  function renderMissions(){
+    missionsListEl.innerHTML = '';
+    P.missions.forEach(function(m){
+      var pct = Math.round(100*m.progress/m.target);
+      var done = m.progress>=m.target;
+      var card = document.createElement('div');
+      card.className = 'cm-missioncard';
+      card.innerHTML =
+        '<div class="cm-missiontitle">'+m.desc+'</div>' +
+        '<div class="cm-missionbar"><i style="width:'+pct+'%"></i></div>' +
+        '<div class="cm-missionrow"><span class="cm-missionprog">'+m.progress+' / '+m.target+' · 🪙'+m.reward+'</span>' +
+        '<button class="cm-claimbtn" '+(done && !m.claimed ? '' : 'disabled')+'>'+(m.claimed ? 'Claimed' : 'Claim')+'</button></div>';
+      card.querySelector('button').addEventListener('click', function(){
+        if(done && !m.claimed){
+          m.claimed = true; P.coins += m.reward; sfxCoin();
+          saveProgress(); renderHeader(); renderMissions();
+        }
+      });
+      missionsListEl.appendChild(card);
+    });
+  }
+
+  // ---------- STREAK ----------
+  function registerDailyPlay(){
+    var today = todayStr();
+    if(P.lastPlayDate === today) return;
+    P.dayStreak = (P.lastPlayDate === yesterdayStr()) ? P.dayStreak+1 : 1;
+    P.lastPlayDate = today;
+    checkStreakMilestones();
+    saveProgress(); renderHeader();
+  }
+  var STREAK_MILESTONES = [{d:3,r:20},{d:7,r:40},{d:14,r:80},{d:30,r:150},{d:60,r:300},{d:100,r:500}];
+  function checkStreakMilestones(){
+    STREAK_MILESTONES.forEach(function(ms){
+      if(P.dayStreak >= ms.d && P.streakClaimed.indexOf(ms.d) === -1){
+        P.streakClaimed.push(ms.d); P.coins += ms.r;
+        showAchToast({icon:'🔥', name:ms.d+'-Day Streak!', reward:ms.r});
+      }
+    });
+  }
+
+  function renderHeader(){
+    coinsHeaderEl.textContent = P.coins;
+    dayStreakEl.textContent = '🔥 ' + P.dayStreak + ' day streak';
+  }
+
+  // ---------- next-goal indicator ----------
+  function updateNextGoal(){
+    if(!running){
+      nextGoalEl.textContent = best>0 ? (best+' points is your Best — beat it!') : 'Play to set your first Best score!';
+      return;
+    }
+    if(best>0 && score<best){
+      nextGoalEl.textContent = (best-score) + ' points to beat your Best';
+      return;
+    }
+    var nearest=null, remain=Infinity;
+    P.missions.forEach(function(m){
+      if(!m.claimed && m.progress<m.target){
+        var r = m.target-m.progress;
+        if(r<remain){ remain=r; nearest=m; }
+      }
+    });
+    if(nearest){ nextGoalEl.textContent = remain + ' more until "'+nearest.desc+'" reward'; }
+    else{ nextGoalEl.textContent = (best>0 ? 'New Best! Keep going 🎉' : 'Scoring your first Best!'); }
+  }
+
+  // ---------- adaptive difficulty ----------
+  function registerOutcome(kind){
+    sessionOutcomes.push(kind);
+    var recent = sessionOutcomes.slice(-8);
+    if(recent.length>=4){
+      var misses = recent.filter(function(x){ return x==='miss'; }).length;
+      var rate = misses/recent.length;
+      adaptiveOffset = rate>0.5 ? -1 : (rate<0.15 ? 1 : 0);
+    }
+  }
+
+  // ---------- helpers ----------
+  function randColor(){ return Math.floor(rng()*activeColors); }
+  function cellEl(i){ return boardEl.children[i]; }
+  function paintTile(i){ var el=cellEl(i), t=tiles[i]; el.style.background=COLORS[t.color]; el.classList.toggle('cm-bonus', !!t.bonus); }
+
+  function buildBoard(){
+    boardEl.innerHTML = '';
+    tiles = [];
+    for(var i=0;i<GRID;i++){
+      tiles.push({color:randColor(), bonus:false});
+      var btn = document.createElement('button');
+      btn.className = 'cm-tile'; btn.dataset.idx = i;
+      btn.addEventListener('click', onTileClick);
+      boardEl.appendChild(btn); paintTile(i);
+    }
+    if(idleWarnEl) boardEl.appendChild(idleWarnEl);
+    ensureSolvable();
+  }
+  function ensureSolvable(){
+    var counts = new Array(activeColors).fill(0);
+    tiles.forEach(function(t){ counts[t.color]++; });
+    if(counts.some(function(c){ return c>=3; })) return;
+    var col = randColor();
+    for(var i=0;i<3;i++){ tiles[i].color = col; }
+    for(var j=0;j<3;j++){ paintTile(j); }
+  }
+  function maybeSpawnBonus(){
+    if(!running) return;
+    var hasBonus = tiles.some(function(t){ return t.bonus; });
+    if(!hasBonus && rng() < 0.6){
+      var idx = Math.floor(rng()*GRID);
+      tiles[idx].bonus = true; paintTile(idx);
+    }
+  }
+  function floatText(idx, text, color){
+    var el = cellEl(idx);
+    var f = document.createElement('div');
+    f.className='cm-float'; f.textContent=text; if(color) f.style.color=color;
+    var r=el.getBoundingClientRect(), br=boardEl.getBoundingClientRect();
+    f.style.left=(r.left-br.left+r.width/2-14)+'px'; f.style.top=(r.top-br.top+r.height/2-10)+'px';
+    boardEl.appendChild(f); setTimeout(function(){ f.remove(); }, 700);
+  }
+  function burstParticles(idx, color){
+    var el = cellEl(idx);
+    var r=el.getBoundingClientRect(), br=boardEl.getBoundingClientRect();
+    var cx=r.left-br.left+r.width/2, cy=r.top-br.top+r.height/2;
+    for(var i=0;i<6;i++){
+      var p=document.createElement('div');
+      p.className='cm-particle'; p.style.background=color; p.style.left=cx+'px'; p.style.top=cy+'px';
+      var ang=Math.random()*Math.PI*2, dist=26+Math.random()*22;
+      p.style.setProperty('--dx', Math.cos(ang)*dist+'px'); p.style.setProperty('--dy', Math.sin(ang)*dist+'px');
+      boardEl.appendChild(p);
+      (function(pp){ setTimeout(function(){ pp.remove(); }, 560); })(p);
+    }
+  }
+  function pulseStat(el){ el.classList.add('cm-pulse'); setTimeout(function(){ el.classList.remove('cm-pulse'); }, 220); }
+  function updateStreakUI(){
+    if(combo>=2){ streakEl.textContent='🔥 x'+Math.min(combo,6)+' combo'; streakEl.classList.add('cm-on'); }
+    else{ streakEl.classList.remove('cm-on'); }
+  }
+
+  // ---------- interaction ----------
+  function onTileClick(e){
+    if(!running || locked) return;
+    var idx = parseInt(e.currentTarget.dataset.idx,10);
+    if(selected.indexOf(idx) !== -1) return;
+    selected.push(idx);
+    cellEl(idx).classList.add('cm-selected');
+    beep(620,.05,'sine',.04);
+    if(selected.length===3){
+      locked = true;
+      var a=selected[0], b=selected[1], c=selected[2];
+      if(tiles[a].color===tiles[b].color && tiles[b].color===tiles[c].color){ handleMatch(selected.slice()); }
+      else{ handleMiss(selected.slice()); }
+    }
+  }
+
+  function handleMatch(idxs){
+    resetTurnTimer();
+    combo += 1; sComboMax = Math.max(sComboMax, combo);
+    registerOutcome('match');
+    var mult = Math.min(combo, 5);
+    var base = 10 + Math.max(0, activeColors-4)*4;
+    var gained = base * mult;
+    var bonusHit = idxs.some(function(i){ return tiles[i].bonus; });
+    if(bonusHit){ gained += 25; sBonusCount++; }
+
+    score += gained; scoreEl.textContent = score; pulseStat(scoreStat);
+    if(score > best){ best = score; bestEl.textContent = best; pulseStat(bestStat); }
+    if(score >= 100 && !sScore100){ sScore100 = true; updateMissionProgress('score100', 1); }
+
+    P.totalMatches += 1;
+    updateMissionProgress('matches', 1);
+    if(combo===5) updateMissionProgress('combo5', 1);
+    if(bonusHit && sBonusCount<=2) updateMissionProgress('bonus', 1);
+
+    if(bonusHit) sfxBonus(); else sfxMatch(mult);
+    vibrate(bonusHit ? [0,20,40,20] : 25);
+    updateStreakUI(); updateNextGoal();
+
+    var midIdx = idxs[1];
+    floatText(midIdx, (bonusHit? '+'+gained+' ★' : '+'+gained + (mult>1? ' x'+mult : '')), bonusHit? '#ffd166' : '#5ad6c4');
+    idxs.forEach(function(i){ burstParticles(i, COLORS[tiles[i].color]); cellEl(i).classList.add('cm-pop'); });
+
+    checkLevelUp();
+
+    setTimeout(function(){
+      idxs.forEach(function(i){
+        tiles[i] = {color:randColor(), bonus:false};
+        var el = cellEl(i); el.className='cm-tile cm-enter'; paintTile(i);
+      });
+      ensureSolvable();
+      idxs.forEach(function(i){ paintTile(i); });
+      selected = []; locked = false;
+    }, 260);
+  }
+
+  function handleMiss(idxs){
+    resetTurnTimer();
+    combo = 0; registerOutcome('miss');
+    updateStreakUI();
+    sfxMiss(); vibrate(60);
+    root.classList.add('cm-shaking');
+    setTimeout(function(){ root.classList.remove('cm-shaking'); }, 340);
+    idxs.forEach(function(i){ cellEl(i).classList.add('cm-shake'); });
+    loseHeart();
+    setTimeout(function(){
+      idxs.forEach(function(i){ var el=cellEl(i); el.classList.remove('cm-shake','cm-selected'); });
+      selected = []; locked = false;
+      if(lives<=0 && running){ endGame('lives'); }
+    }, 340);
+  }
+
+  function loseHeart(){
+    lives = Math.max(0, lives-1);
+    var el = heartEls[lives];
+    if(el){
+      el.classList.add('cm-losing');
+      setTimeout(function(){ el.classList.add('cm-lost'); el.classList.remove('cm-losing'); el.textContent='🤍'; }, 180);
+    }
+  }
+  function resetHearts(){
+    lives = MAX_LIVES;
+    heartEls.forEach(function(el){ el.classList.remove('cm-lost','cm-losing'); el.textContent='❤️'; });
+  }
+
+  // difficulty ramps with LEVEL + adapts to recent performance
+  function colorsForLevel(lvl){
+    var raw = 3 + lvl + adaptiveOffset;
+    return Math.max(4, Math.min(COLORS.length, raw));
+  }
+  function checkLevelUp(){
+    var newLevel = 1 + Math.floor(score/100);
+    if(newLevel > level){
+      level = newLevel; levelPill.textContent = 'Level '+level;
+      var oldColors = activeColors;
+      activeColors = colorsForLevel(level);
+      sfxLevelUp(); vibrate([0,30,40,30,40,60]);
+      ltNum.textContent = 'Level '+level;
+      ltSub.textContent = activeColors>oldColors ? (activeColors+' colors now — stay sharp!') : 'getting harder…';
+      levelToast.classList.add('cm-show');
+      setTimeout(function(){ levelToast.classList.remove('cm-show'); }, 1200);
+    }
+    xpbar.style.width = (score % 100) + '%';
+  }
+
+  // ---------- per-match timer: 5s to make a match, or lose a heart ----------
+  var idleWarnShown = false;
+  function hideIdleWarn(){ if(idleWarnShown){ idleWarnEl.classList.remove('cm-show'); idleWarnShown=false; } }
+  function resetTurnTimer(){
+    timeLeft = TURN_TIME;
+    timeEl.textContent = timeLeft;
+    timebarEl.style.background = 'linear-gradient(90deg,var(--cm-accent2),var(--cm-accent))';
+    timebarEl.style.transform = 'scaleX(1)';
+    hideIdleWarn();
+  }
+  function tick(){
+    if(!running || locked) return;
+    timeLeft -= 1;
+    timeEl.textContent = Math.max(0,timeLeft);
+    timebarEl.style.transform = 'scaleX(' + Math.max(0,timeLeft/TURN_TIME) + ')';
+    if(timeLeft<=2){ timebarEl.style.background='linear-gradient(90deg,#ff5c7a,#ffb020)'; if(timeLeft>0){ sfxTick(); idleWarnEl.classList.add('cm-show'); idleWarnShown=true; } }
+    if(timeLeft<=0){ handleTimeout(); }
+  }
+  function handleTimeout(){
+    combo = 0; registerOutcome('miss');
+    updateStreakUI();
+    sfxMiss(); vibrate(60);
+    root.classList.add('cm-shaking');
+    setTimeout(function(){ root.classList.remove('cm-shaking'); }, 340);
+    loseHeart();
+    selected.forEach(function(i){ cellEl(i).classList.remove('cm-selected'); });
+    selected = []; locked = false;
+    // fresh board for the next attempt
+    tiles.forEach(function(t){ t.color = randColor(); t.bonus = false; });
+    ensureSolvable();
+    for(var i=0;i<GRID;i++){ paintTile(i); }
+    boardEl.classList.add('cm-reshuffling');
+    setTimeout(function(){ boardEl.classList.remove('cm-reshuffling'); }, 460);
+    if(lives<=0){ endGame('lives'); }
+    else{ resetTurnTimer(); }
+  }
+
+  function startGame(isDaily){
+    dailyMode = !!isDaily;
+    rng = dailyMode ? mulberry32(hashStr(todayStr())) : Math.random;
+    ensureMissionsForToday(); ensureDailyForToday();
+    score=0; level=1; combo=0;
+    selected=[]; locked=false; hideIdleWarn();
+    sessionOutcomes=[]; adaptiveOffset=0; sComboMax=0; sBonusCount=0; sScore100=false;
+    activeColors = colorsForLevel(1);
+    resetHearts();
+    scoreEl.textContent='0';
+    resetTurnTimer();
+    levelPill.textContent='Level 1'; xpbar.style.width='0%';
+    updateStreakUI();
+    buildBoard();
+    running = true;
+    setTab('play');
+    startOverlay.classList.remove('cm-show');
+    overOverlay.classList.remove('cm-show');
+    updateMissionProgress('games', 1);
+    updateNextGoal();
+    clearInterval(timerId); clearInterval(bonusTimerId); clearInterval(adCountdownId);
+    timerId = setInterval(tick, 1000);
+    bonusTimerId = setInterval(maybeSpawnBonus, 7000);
+  }
+
+  function ensureDailyForToday(){
+    var today = todayStr();
+    if(P.dailyDate !== today){ P.dailyDate = today; P.dailyBest = 0; saveProgress(); }
+    dailyBestLabel.textContent = P.dailyBest;
+  }
+
+  var adCountdownId = null;
+  function startAdCountdown(){
+    clearInterval(adCountdownId);
+    var s = 5;
+    adSlotGameover.textContent = 'Ad · ' + s + 's';
+    adCountdownId = setInterval(function(){
+      s -= 1;
+      if(s <= 0){ adSlotGameover.textContent = 'Ad'; clearInterval(adCountdownId); }
+      else{ adSlotGameover.textContent = 'Ad · ' + s + 's'; }
+    }, 1000);
+  }
+
+  function endGame(reason){
+    running = false;
+    clearInterval(timerId); clearInterval(bonusTimerId);
+    hideIdleWarn();
+    sfxOver(); vibrate([0,40,60,40]);
+    overTitleEl.textContent = 'Out of lives!';
+
+    var isBest = false;
+    if(score > P.bestScore){ P.bestScore = score; best = score; bestEl.textContent = best; isBest = true; }
+    var isDailyBest = false;
+    if(dailyMode && score > P.dailyBest){ P.dailyBest = score; isDailyBest = true; dailyBestLabel.textContent = P.dailyBest; }
+
+    var coinsEarned = Math.floor(score/10) + (dailyMode ? 5 : 0);
+    P.coins += coinsEarned;
+    P.totalGames += 1;
+    saveProgress();
+
+    registerDailyPlay();
+    checkAchievements({ comboMax:sComboMax, lastScore:score, lastLevel:level, beatBest:isBest, playedDaily:dailyMode });
+
+    finalScoreEl.textContent = score;
+    finalLevelEl.textContent = level;
+    newBestMsg.style.display = isBest ? 'block' : 'none';
+    newDailyMsg.style.display = isDailyBest ? 'block' : 'none';
+    coinsEarnedEl.textContent = '+'+coinsEarned+' 🪙';
+    renderHeader(); renderMissions(); renderShop(); updateNextGoal();
+    overOverlay.classList.add('cm-show');
+    startAdCountdown();
+  }
+
+  root.querySelector('#cm-startBtn').addEventListener('click', function(){ startGame(false); });
+  root.querySelector('#cm-againBtn').addEventListener('click', function(){ startGame(dailyMode); });
+  dailyBtn.addEventListener('click', function(){ startGame(true); });
+
+  // ---------- init ----------
+  ensureMissionsForToday();
+  ensureDailyForToday();
+  applyTheme(P.theme);
+  renderHeader(); renderMissions(); renderShop(); renderAchievements();
+  activeColors = 4;
+  buildBoard();
+  updateNextGoal();
+  startOverlay.classList.add('cm-show');
+})();
+</script>
+</body>
+</html>
