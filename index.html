@@ -847,10 +847,12 @@
   function startAdCountdown(){
     clearInterval(adCountdownId);
     var s = 5;
-    adSlotGameover.textContent = 'Ad · ' + s + 's';
+    adSlotGameover.textContent = '<script ...invoke.js></script>
+<div id="container-c3018..."></div> · ' + s + 's';
     adCountdownId = setInterval(function(){
       s -= 1;
-      if(s <= 0){ adSlotGameover.textContent = 'Ad'; clearInterval(adCountdownId); }
+      if(s <= 0){ adSlotGameover.textContent = '<script ...invoke.js></script>
+<div id="container-c3018..."></div>'; clearInterval(adCountdownId); }
       else{ adSlotGameover.textContent = 'Ad · ' + s + 's'; }
     }, 1000);
   }
