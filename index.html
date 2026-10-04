@@ -1,25 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <script src="https://pl31664277.profitableratecpmnetwork.com/b5/d6/da/b5d6dae9a72244305505f8798c434f02.js"></script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Color Match Pro</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);}
-  *{box-sizing:border-box;}
-  html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%;}
-  body{height:100%;margin:0;background:#0b0c14;display:flex;align-items:center;justify-content:center;overflow-x:hidden;}
-</style>
-</head>
-  <div class="cm-adslot" id="cm-adslot-banner">
-  <script async="async" data-cfasync="false" src="https://pl31664278.profitableratecpmnetwork.com/c3018b19ca618404acbe60254ef1aa9f/invoke.js"></script>
-  <div id="container-c3018b19ca618404acbe60254ef1aa9f"></div>
-  </div>
-<body>
+<!-- ===== Color Match PRO v3 — paste this whole block into Blogger ===== -->
 <div id="cm-widget">
 
   <div class="cm-header">
@@ -66,7 +45,30 @@
 
       <button class="cm-btn cm-dailybtn" id="cm-dailyBtn">🗓️ Daily Challenge · Best: <span id="cm-dailyBestLabel">0</span></button>
 
-      <div class="cm-adslot" id="cm-adslot-banner">Ad</div>
+      <!-- AD SLOT 1: in-page banner. Paste your real ADSTERRA code here,
+           replacing the line below. Example (use YOUR OWN key from Adsterra):
+
+           <div class="cm-adslot" id="cm-adslot-banner">
+             <script type="text/javascript">
+               atOptions = {
+                 'key' : 'YOUR-ADSTERRA-KEY-HERE',
+                 'format' : 'iframe',
+                 'height' : 50,
+                 'width' : 320,
+                 'params' : {}
+               };
+             <\/script>
+             <script type="text/javascript" src="//www.highperformanceformat.com/YOUR-ADSTERRA-KEY-HERE/invoke.js"><\/script>
+           </div>
+
+           Use a "Banner" (320x50 fits here) or "Native Banner" ad unit from
+           your Adsterra dashboard. Avoid Popunder / Social Bar — those open
+           new tabs or redirect on any click, which breaks the "no forced
+           ads" rule we set for this game. -->
+      <div class="cm-adslot" id="cm-adslot-banner">
+        <script async="async" data-cfasync="false" src="https://pl31664278.profitableratecpmnetwork.com/c3018b19ca618404acbe60254ef1aa9f/invoke.js"></script>
+        <div id="container-c3018b19ca618404acbe60254ef1aa9f"></div>
+      </div>
     </div>
   </div>
 
@@ -105,7 +107,14 @@
       <div class="cm-newbest" id="cm-newBestMsg" style="display:none;">★ New best score!</div>
       <div class="cm-newbest" id="cm-newDailyMsg" style="display:none;">🗓️ New Daily Challenge best!</div>
       <div class="cm-coinsEarned" id="cm-coinsEarned">+0 🪙</div>
-      <div class="cm-adslot" id="cm-adslot-gameover">Ad</div>
+      <!-- AD SLOT 2: Game Over screen — highest-attention moment.
+           cm-adCountdownLabel is JS-controlled (shows "Ad · 5s" countdown)
+           and is kept SEPARATE from the actual ad slot below it, so pasting
+           your Adsterra script into cm-adslot-gameover never gets wiped out.
+           Paste the same kind of Adsterra Banner/Native code here (a 300x250
+           "Medium Rectangle" unit fits this card well). -->
+      <div class="cm-adlabel" id="cm-adCountdownLabel">Ad</div>
+      <div class="cm-adslot" id="cm-adslot-gameover"></div>
       <button class="cm-btn" id="cm-againBtn">Play Again</button>
     </div>
   </div>
@@ -252,6 +261,7 @@
     color:var(--cm-ink-dim); font-size:11px; padding:6px; overflow:hidden;
   }
   #cm-widget .cm-card .cm-adslot{margin-top:4px; margin-bottom:18px;}
+  #cm-widget .cm-adlabel{margin-top:14px; font-size:10px; color:var(--cm-ink-dim); text-align:center; letter-spacing:.04em;}
   #cm-widget .cm-levelToast, #cm-widget .cm-achToast{
     position:absolute; left:50%; transform:translate(-50%,-30px) scale(.8); opacity:0;
     text-align:center; z-index:40; pointer-events:none; transition:opacity .25s ease, transform .25s ease;
@@ -369,7 +379,7 @@
   var overTitleEl = root.querySelector('#cm-overTitle');
   var coinsHeaderEl = root.querySelector('#cm-coins');
   var dayStreakEl = root.querySelector('#cm-daystreak');
-  var adSlotGameover = root.querySelector('#cm-adslot-gameover');
+  var adCountdownLabel = root.querySelector('#cm-adCountdownLabel');
   var dailyBtn = root.querySelector('#cm-dailyBtn');
   var dailyBestLabel = root.querySelector('#cm-dailyBestLabel');
   var missionsListEl = root.querySelector('#cm-missionsList');
@@ -847,13 +857,11 @@
   function startAdCountdown(){
     clearInterval(adCountdownId);
     var s = 5;
-    adSlotGameover.textContent = '<script ...invoke.js></script>
-<div id="container-c3018..."></div> · ' + s + 's';
+    adCountdownLabel.textContent = 'Ad · ' + s + 's';
     adCountdownId = setInterval(function(){
       s -= 1;
-      if(s <= 0){ adSlotGameover.textContent = '<script ...invoke.js></script>
-<div id="container-c3018..."></div>'; clearInterval(adCountdownId); }
-      else{ adSlotGameover.textContent = 'Ad · ' + s + 's'; }
+      if(s <= 0){ adCountdownLabel.textContent = 'Ad'; clearInterval(adCountdownId); }
+      else{ adCountdownLabel.textContent = 'Ad · ' + s + 's'; }
     }, 1000);
   }
 
@@ -902,6 +910,4 @@
   startOverlay.classList.add('cm-show');
 })();
 </script>
-  <script src="https://pl31664276.profitableratecpmnetwork.com/f8/d5/72/f8d5720c6925b7c9806a69d6f9356833.js"></script>
-</body>
-</html>
+<!-- ===== end Color Match PRO v3 ===== -->
